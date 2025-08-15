@@ -42,7 +42,7 @@
 > Enable springdoc OpenAPI (MC §4.3). Add a sample controller to verify docs load at `/swagger-ui`. Commit message (no auto commit) :`chore(api): enable openapi and sample endpoint`.
 
 **A9 — Seed (Dev)**
-> Add a `CommandLineRunner` (dev profile) to seed currencies (USD/EUR/JPY) and a sample user. Commit message (no auto commit) :`chore(dev): add basic seeds`.
+> Add a `CommandLineRunner` (dev profile) to seed currencies (USD/EUR/JPY/TND). Commit message (no auto commit) :`chore(dev): add basic seeds`.
 
 ---
 
