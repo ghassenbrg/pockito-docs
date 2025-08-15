@@ -1,0 +1,1505 @@
+{
+  "info": {
+    "name": "Pockito API",
+    "description": "Complete API collection for Pockito Budget Management Application with automatic JWT token management using Authorization Code flow",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "keycloakUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "realm",
+      "value": "pockito",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "pockito-postman",
+      "type": "string"
+    },
+    {
+      "key": "redirectUri",
+      "value": "http://localhost:4200/callback",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "codeVerifier",
+      "value": "",
+      "type": "string"
+    },
+         {
+       "key": "state",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "codeChallenge",
+       "value": "",
+       "type": "string"
+     }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+         {
+       "name": "🔐 Authentication",
+       "item": [
+                   {
+            "name": "Simple Token (Recommended for Testing)",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/x-www-form-urlencoded"
+                }
+              ],
+              "body": {
+                "mode": "urlencoded",
+                "urlencoded": [
+                  {
+                    "key": "grant_type",
+                    "value": "password",
+                    "type": "text"
+                  },
+                  {
+                    "key": "client_id",
+                    "value": "pockito-postman",
+                    "type": "text"
+                  },
+                  {
+                    "key": "username",
+                    "value": "gbargougui",
+                    "type": "text"
+                  },
+                  {
+                    "key": "password",
+                    "value": "gbargougui",
+                    "type": "text"
+                  }
+                ]
+              },
+              "url": {
+                "raw": "{{keycloakUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+                "host": ["{{keycloakUrl}}"],
+                "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+              }
+            },
+           "event": [
+             {
+               "listen": "test",
+               "script": {
+                 "exec": [
+                   "if (pm.response.code === 200) {",
+                   "    const response = pm.response.json();",
+                   "    pm.collectionVariables.set('accessToken', response.access_token);",
+                   "    pm.collectionVariables.set('refreshToken', response.refresh_token);",
+                   "    console.log('✅ Token obtained successfully!');",
+                   "    console.log('Access Token:', response.access_token.substring(0, 50) + '...');",
+                   "    console.log('Token expires in:', response.expires_in, 'seconds');",
+                   "    console.log('🎉 You can now use all the API endpoints!');",
+                   "} else {",
+                   "    console.error('❌ Failed to get token');",
+                   "    console.error('Status:', pm.response.status);",
+                   "    console.error('Response:', pm.response.text());",
+                   "    console.error('Make sure:');",
+                   "    console.error('1. Keycloak is running on localhost:8081');",
+                   "    console.error('2. Username and password are correct');",
+                   "    console.error('3. The pockito-postman client is configured');",
+                   "}"
+                 ]
+               }
+             }
+           ]
+         },
+        {
+          "name": "Step 1: Get Authorization URL",
+          "request": {
+            "method": "GET",
+            "header": [],
+                         "url": {
+               "raw": "{{keycloakUrl}}/realms/{{realm}}/protocol/openid-connect/auth?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=openid%20profile%20email&state={{state}}&code_challenge={{codeChallenge}}&code_challenge_method=S256",
+               "host": ["{{keycloakUrl}}"],
+               "path": ["realms", "{{realm}}", "protocol", "openid-connect", "auth"],
+               "query": [
+                 {
+                   "key": "response_type",
+                   "value": "code"
+                 },
+                 {
+                   "key": "client_id",
+                   "value": "{{clientId}}"
+                 },
+                 {
+                   "key": "redirect_uri",
+                   "value": "{{redirectUri}}"
+                 },
+                 {
+                   "key": "scope",
+                   "value": "openid profile email"
+                 },
+                 {
+                   "key": "state",
+                   "value": "{{state}}"
+                 },
+                 {
+                   "key": "code_challenge",
+                   "value": "{{codeChallenge}}"
+                 },
+                 {
+                   "key": "code_challenge_method",
+                   "value": "S256"
+                 }
+               ]
+             }
+          },
+                     "event": [
+             {
+               "listen": "test",
+               "script": {
+                 "exec": [
+                   "// Generate PKCE code verifier and state using Postman's available methods",
+                   "function generateRandomString(length) {",
+                   "    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';",
+                   "    let result = '';",
+                   "    for (let i = 0; i < length; i++) {",
+                   "        result += chars.charAt(Math.floor(Math.random() * chars.length));",
+                   "    }",
+                   "    return result;",
+                   "}",
+                   "",
+                   "function generateState() {",
+                   "    return generateRandomString(32);",
+                   "}",
+                   "",
+                   "// For PKCE, we'll use a fixed code verifier and challenge for testing",
+                   "// In production, you would generate these dynamically",
+                   "const codeVerifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';",
+                   "const codeChallenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';",
+                   "const state = generateState();",
+                   "",
+                   "pm.collectionVariables.set('codeVerifier', codeVerifier);",
+                   "pm.collectionVariables.set('codeChallenge', codeChallenge);",
+                   "pm.collectionVariables.set('state', state);",
+                   "",
+                   "console.log('✅ Authorization URL generated');",
+                   "console.log('Code Verifier:', codeVerifier);",
+                   "console.log('Code Challenge:', codeChallenge);",
+                   "console.log('State:', state);",
+                   "console.log('📋 Next steps:');",
+                   "console.log('1. Copy the URL from the response');",
+                   "console.log('2. Open it in a browser');",
+                   "console.log('3. Login with your credentials');",
+                   "console.log('4. Copy the authorization code from the redirect URL');",
+                   "console.log('5. Use the \"Step 2: Exchange Code for Token\" request');"
+                 ]
+               }
+             }
+           ]
+        },
+        {
+          "name": "Step 2: Exchange Code for Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "authorization_code",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{clientId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "PASTE_AUTHORIZATION_CODE_HERE",
+                  "type": "text"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{redirectUri}}",
+                  "type": "text"
+                },
+                {
+                  "key": "code_verifier",
+                  "value": "{{codeVerifier}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloakUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloakUrl}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.access_token);",
+                  "    pm.collectionVariables.set('refreshToken', response.refresh_token);",
+                  "    console.log('✅ Access token saved successfully');",
+                  "    console.log('Token expires in:', response.expires_in, 'seconds');",
+                  "    console.log('Refresh token saved for future use');",
+                  "} else {",
+                  "    console.error('❌ Failed to exchange code for token');",
+                  "    console.error('Status:', pm.response.status);",
+                  "    console.error('Response:', pm.response.text());",
+                  "    console.error('Make sure you:');",
+                  "    console.error('1. Used the authorization code from the redirect URL');",
+                  "    console.error('2. Used the same code_verifier that was generated');",
+                  "    console.error('3. Used the correct redirect_uri');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+                 {
+           "name": "Simple Auth (No PKCE)",
+           "request": {
+             "method": "GET",
+             "header": [],
+             "url": {
+               "raw": "{{keycloakUrl}}/realms/{{realm}}/protocol/openid-connect/auth?response_type=code&client_id={{clientId}}&redirect_uri={{redirectUri}}&scope=openid%20profile%20email&state={{state}}",
+               "host": ["{{keycloakUrl}}"],
+               "path": ["realms", "{{realm}}", "protocol", "openid-connect", "auth"],
+               "query": [
+                 {
+                   "key": "response_type",
+                   "value": "code"
+                 },
+                 {
+                   "key": "client_id",
+                   "value": "{{clientId}}"
+                 },
+                 {
+                   "key": "redirect_uri",
+                   "value": "{{redirectUri}}"
+                 },
+                 {
+                   "key": "scope",
+                   "value": "openid profile email"
+                 },
+                 {
+                   "key": "state",
+                   "value": "{{state}}"
+                 }
+               ]
+             }
+           },
+           "event": [
+             {
+               "listen": "test",
+               "script": {
+                 "exec": [
+                   "// Generate state for simple auth",
+                   "function generateRandomString(length) {",
+                   "    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';",
+                   "    let result = '';",
+                   "    for (let i = 0; i < length; i++) {",
+                   "        result += chars.charAt(Math.floor(Math.random() * chars.length));",
+                   "    }",
+                   "    return result;",
+                   "}",
+                   "",
+                   "const state = generateRandomString(32);",
+                   "pm.collectionVariables.set('state', state);",
+                   "",
+                   "console.log('✅ Simple Authorization URL generated');",
+                   "console.log('State:', state);",
+                   "console.log('📋 Next steps:');",
+                   "console.log('1. Copy the URL from the response');",
+                   "console.log('2. Open it in a browser');",
+                   "console.log('3. Login with your credentials');",
+                   "console.log('4. Copy the authorization code from the redirect URL');",
+                   "console.log('5. Use the \"Step 2: Exchange Code for Token\" request (remove code_verifier)');"
+                 ]
+               }
+             }
+           ]
+         },
+         {
+           "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "refresh_token",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{clientId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "refresh_token",
+                  "value": "{{refreshToken}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloakUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloakUrl}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.access_token);",
+                  "    if (response.refresh_token) {",
+                  "        pm.collectionVariables.set('refreshToken', response.refresh_token);",
+                  "    }",
+                  "    console.log('✅ Token refreshed successfully');",
+                  "    console.log('New token expires in:', response.expires_in, 'seconds');",
+                  "} else {",
+                  "    console.error('❌ Failed to refresh token');",
+                  "    console.error('Status:', pm.response.status);",
+                  "    console.error('Response:', pm.response.text());",
+                  "    console.error('You may need to re-authenticate using Step 1');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🏥 Health & Monitoring",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Application Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "info"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Documentation",
+      "item": [
+        {
+          "name": "OpenAPI Documentation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v3/api-docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["v3", "api-docs"]
+            }
+          }
+        },
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/swagger-ui",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger-ui"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Sample Endpoints",
+      "item": [
+        {
+          "name": "Public Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sample/public",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sample", "public"]
+            }
+          }
+        },
+        {
+          "name": "Health Check (Sample)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sample/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sample", "health"]
+            }
+          }
+        },
+        {
+          "name": "Echo Message",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sample/echo/{{$randomLoremSentence}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sample", "echo", "{{$randomLoremSentence}}"]
+            }
+          }
+        },
+        {
+          "name": "Protected Endpoint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sample/protected",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sample", "protected"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 Wallets",
+      "item": [
+        {
+          "name": "List Wallets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            }
+          }
+        },
+        {
+          "name": "Get Wallet by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Savings\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"💰\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#3B82F6\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000.00,\n  \"goalAmount\": 5000.00,\n  \"setDefault\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            }
+          }
+        },
+        {
+          "name": "Update Wallet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Savings\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🏦\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#10B981\",\n  \"type\": \"SAVINGS\",\n  \"goalAmount\": 10000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}"]
+            }
+          }
+        },
+        {
+          "name": "Archive Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Activate Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Set Default Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/default",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "default"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?type=EXPENSE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "EXPENSE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Groceries\",\n  \"type\": \"EXPENSE\",\n  \"color\": \"#EF4444\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🛒\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Groceries\",\n  \"type\": \"EXPENSE\",\n  \"color\": \"#F59E0B\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🍎\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Archive Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Activate Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories/{{categoryId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories", "{{categoryId}}", "activate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Transactions",
+      "item": [
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/txns?type=EXPENSE&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "EXPENSE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/txns/{{txnId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns", "{{txnId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Expense Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"EXPENSE\",\n  \"occurredAt\": \"2024-01-15\",\n  \"walletId\": \"{{walletId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 50.00,\n  \"currencyCode\": \"USD\",\n  \"note\": \"Grocery shopping\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/txns",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns"]
+            }
+          }
+        },
+        {
+          "name": "Create Income Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"INCOME\",\n  \"occurredAt\": \"2024-01-15\",\n  \"walletId\": \"{{walletId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 2000.00,\n  \"currencyCode\": \"USD\",\n  \"note\": \"Salary payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/txns",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns"]
+            }
+          }
+        },
+        {
+          "name": "Create Transfer Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TRANSFER\",\n  \"occurredAt\": \"2024-01-15\",\n  \"fromWalletId\": \"{{walletId}}\",\n  \"toWalletId\": \"{{walletId2}}\",\n  \"fromAmount\": 100.00,\n  \"toAmount\": 100.00,\n  \"fromCurrencyCode\": \"USD\",\n  \"toCurrencyCode\": \"USD\",\n  \"exchangeRate\": 1.0,\n  \"note\": \"Transfer between accounts\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/txns",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns"]
+            }
+          }
+        },
+        {
+          "name": "Update Transaction",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"EXPENSE\",\n  \"occurredAt\": \"2024-01-15\",\n  \"walletId\": \"{{walletId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 75.00,\n  \"currencyCode\": \"USD\",\n  \"note\": \"Updated grocery shopping\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/txns/{{txnId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns", "{{txnId}}"]
+            }
+          }
+        },
+        {
+          "name": "Archive Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/txns/{{txnId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns", "{{txnId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Activate Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/txns/{{txnId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "txns", "{{txnId}}", "activate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Subscriptions",
+      "item": [
+        {
+          "name": "List Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Netflix Subscription\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"📺\",\n  \"amount\": 15.99,\n  \"currencyCode\": \"USD\",\n  \"walletId\": \"{{walletId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"frequency\": \"MONTHLY\",\n  \"interval\": 1,\n  \"dayOfMonth\": 15,\n  \"startDate\": \"2024-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Update Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Netflix\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🎬\",\n  \"amount\": 19.99,\n  \"currencyCode\": \"USD\",\n  \"walletId\": \"{{walletId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"frequency\": \"MONTHLY\",\n  \"interval\": 1,\n  \"dayOfMonth\": 15,\n  \"startDate\": \"2024-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Pay Subscription Now",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}/pay-now",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}", "pay-now"]
+            }
+          }
+        },
+        {
+          "name": "Archive Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Activate Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "{{subscriptionId}}", "activate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Budgets",
+      "item": [
+        {
+          "name": "List Budgets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets"]
+            }
+          }
+        },
+        {
+          "name": "Get Budget by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/{{budgetId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets", "{{budgetId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monthly Groceries Budget\",\n  \"period\": \"MONTHLY\",\n  \"startDate\": \"2024-01-01\",\n  \"limitAmount\": 500.00,\n  \"currencyCode\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets"]
+            }
+          }
+        },
+        {
+          "name": "Update Budget",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Monthly Groceries\",\n  \"period\": \"MONTHLY\",\n  \"startDate\": \"2024-01-01\",\n  \"limitAmount\": 600.00,\n  \"currencyCode\": \"USD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/{{budgetId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets", "{{budgetId}}"]
+            }
+          }
+        },
+        {
+          "name": "Archive Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/{{budgetId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets", "{{budgetId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Activate Budget",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets/{{budgetId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets", "{{budgetId}}", "activate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤝 Agreements",
+      "item": [
+        {
+          "name": "List Agreements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements"]
+            }
+          }
+        },
+        {
+          "name": "Get Agreement by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements/{{agreementId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements", "{{agreementId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Agreement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personName\": \"John Doe\",\n  \"type\": \"LEND\",\n  \"principalAmount\": 1000.00,\n  \"currencyCode\": \"USD\",\n  \"walletId\": \"{{walletId}}\",\n  \"startDate\": \"2024-01-15\",\n  \"note\": \"Loan to John for car repair\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements"]
+            }
+          }
+        },
+        {
+          "name": "Update Agreement",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personName\": \"John Doe\",\n  \"type\": \"LEND\",\n  \"principalAmount\": 1000.00,\n  \"currencyCode\": \"USD\",\n  \"walletId\": \"{{walletId}}\",\n  \"startDate\": \"2024-01-15\",\n  \"note\": \"Updated loan to John for car repair\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements/{{agreementId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements", "{{agreementId}}"]
+            }
+          }
+        },
+        {
+          "name": "Repay Agreement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 250.00,\n  \"currencyCode\": \"USD\",\n  \"note\": \"Partial repayment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements/{{agreementId}}/repay",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements", "{{agreementId}}", "repay"]
+            }
+          }
+        },
+        {
+          "name": "Archive Agreement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements/{{agreementId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements", "{{agreementId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Activate Agreement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agreements/{{agreementId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agreements", "{{agreementId}}", "activate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📈 Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard?range=month&from=2024-01-01&to=2024-01-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard"],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "month"
+                },
+                {
+                  "key": "from",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2024-01-31"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh token if it's about to expire",
+          "const token = pm.collectionVariables.get('accessToken');",
+          "const refreshToken = pm.collectionVariables.get('refreshToken');",
+          "if (token && refreshToken) {",
+          "    try {",
+          "        const payload = JSON.parse(atob(token.split('.')[1]));",
+          "        const exp = payload.exp * 1000; // Convert to milliseconds",
+          "        const now = Date.now();",
+          "        const timeUntilExpiry = exp - now;",
+          "        ",
+          "        // If token expires in less than 5 minutes, refresh it",
+          "        if (timeUntilExpiry < 300000) {",
+          "            console.log('Token expires soon, attempting refresh...');",
+          "            // Note: Automatic refresh would require a more complex setup",
+          "            // For now, manually use the \"Refresh Token\" request",
+          "        }",
+          "    } catch (e) {",
+          "        console.log('Could not parse token:', e);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}
