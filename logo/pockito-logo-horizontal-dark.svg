@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 415 145">
+  <g transform="translate(8,8)">
+    <rect x="0" y="0" width="128" height="128" rx="28" fill="url(#grad)" />
+    <defs>
+      <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4F46E5"/>
+        <stop offset="1" stop-color="#06B6D4"/>
+      </linearGradient>
+    </defs>
+    <rect x="20" y="40" width="88" height="48" rx="12" fill="#fff" opacity="0.95"/>
+    <circle cx="92" cy="64" r="9" fill="#FBBF24"/>
+  </g>
+  <text x="160" y="95" font-family="Inter, sans-serif" font-size="65" font-weight="700" fill="#FFFFFF">Pockito</text>
+  <circle cx="400" cy="45" r="7" fill="#FBBF24"/>
+</svg>
