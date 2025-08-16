@@ -1,0 +1,377 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Pockito API",
+    "description": "Budget Management Application API",
+    "contact": { "name": "Pockito Team", "email": "pockito@ghassen.io" },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:8080", "description": "Generated server url" }
+  ],
+  "tags": [
+    {
+      "name": "Utilities",
+      "description": "Utility endpoints for testing, health checks, and system information"
+    }
+  ],
+  "paths": {
+    "/api/sample/protected": {
+      "post": {
+        "tags": ["Utilities"],
+        "summary": "Protected Endpoint",
+        "description": "A protected endpoint that requires authentication with USER role. Demonstrates secure endpoint access control.",
+        "operationId": "accessProtectedEndpoint",
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Missing or invalid authentication token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "Access granted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProtectedResponse" },
+                "examples": {
+                  "Protected Access": {
+                    "description": "Protected Access",
+                    "value": {
+                      "message": "You have access to the protected endpoint",
+                      "timestamp": "2024-01-15T10:30:00Z",
+                      "authenticated": true,
+                      "userRole": "USER",
+                      "accessLevel": "STANDARD"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/sample/health": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Health Check",
+        "description": "Returns the current health status of the Pockito API service. This endpoint is useful for monitoring and load balancer health checks.",
+        "operationId": "getHealthStatus",
+        "responses": {
+          "503": {
+            "description": "Service is unhealthy or experiencing issues",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "200": {
+            "description": "Service is healthy and operational",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" },
+                "examples": {
+                  "Healthy Service": {
+                    "description": "Healthy Service",
+                    "value": {
+                      "status": "healthy",
+                      "timestamp": "2024-01-15T10:30:00Z",
+                      "service": "Pockito API",
+                      "version": "1.0.0",
+                      "uptime": "2h 15m 30s"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sample/echo/{message}": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Echo Message",
+        "description": "Echoes back the provided message along with additional metadata. Useful for testing API connectivity and parameter handling.",
+        "operationId": "echoMessage",
+        "parameters": [
+          {
+            "name": "message",
+            "in": "path",
+            "description": "Message to echo back",
+            "required": true,
+            "schema": { "maxLength": 100, "minLength": 1 },
+            "example": "Hello World"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message echoed successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EchoResponse" },
+                "examples": {
+                  "Echo Response": {
+                    "description": "Echo Response",
+                    "value": {
+                      "message": "Hello World",
+                      "timestamp": "2024-01-15T10:30:00Z",
+                      "length": 11,
+                      "uppercase": "HELLO WORLD",
+                      "lowercase": "hello world"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid message provided",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "Invalid Message": {
+                    "description": "Invalid Message",
+                    "value": {
+                      "error": "Bad Request",
+                      "message": "Message cannot be empty or null",
+                      "timestamp": "2024-01-15T10:30:00Z",
+                      "status": 400
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Public Endpoint",
+        "description": "A public endpoint that doesn't require authentication. Useful for checking if the service is accessible without credentials.",
+        "operationId": "getPublicInfo",
+        "responses": {
+          "200": {
+            "description": "Public access granted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicResponse" },
+                "examples": {
+                  "Public Access": {
+                    "description": "Public Access",
+                    "value": {
+                      "message": "This is a public endpoint",
+                      "timestamp": "2024-01-15T10:30:00Z",
+                      "authenticated": false,
+                      "service": "Pockito API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Public Endpoint",
+        "description": "A public endpoint that doesn't require authentication. Useful for checking if the service is accessible without credentials.",
+        "operationId": "getPublicInfo_1",
+        "responses": {
+          "200": {
+            "description": "Public access granted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicResponse" },
+                "examples": {
+                  "Public Access": {
+                    "description": "Public Access",
+                    "value": {
+                      "message": "This is a public endpoint",
+                      "timestamp": "2024-01-15T10:30:00Z",
+                      "authenticated": false,
+                      "service": "Pockito API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error response",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error type",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Message cannot be empty or null"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Error timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code",
+            "example": 400
+          }
+        }
+      },
+      "ProtectedResponse": {
+        "type": "object",
+        "description": "Protected endpoint response",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Response message",
+            "example": "You have access to the protected endpoint"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Response timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "authenticated": {
+            "type": "boolean",
+            "description": "Authentication status",
+            "example": true
+          },
+          "userRole": {
+            "type": "string",
+            "description": "User role",
+            "example": "USER"
+          },
+          "accessLevel": {
+            "type": "string",
+            "description": "Access level",
+            "example": "STANDARD"
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "description": "Health check response",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Current health status",
+            "example": "healthy"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Timestamp of the health check",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "service": {
+            "type": "string",
+            "description": "Service name",
+            "example": "Pockito API"
+          },
+          "version": {
+            "type": "string",
+            "description": "Service version",
+            "example": "1.0.0"
+          },
+          "uptime": {
+            "type": "string",
+            "description": "Service uptime",
+            "example": "2h 15m 30s"
+          }
+        }
+      },
+      "EchoResponse": {
+        "type": "object",
+        "description": "Echo response",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Original message",
+            "example": "Hello World"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Response timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "length": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Message length",
+            "example": 11
+          },
+          "uppercase": {
+            "type": "string",
+            "description": "Message in uppercase",
+            "example": "HELLO WORLD"
+          },
+          "lowercase": {
+            "type": "string",
+            "description": "Message in lowercase",
+            "example": "hello world"
+          }
+        }
+      },
+      "PublicResponse": {
+        "type": "object",
+        "description": "Public endpoint response",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Response message",
+            "example": "This is a public endpoint"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Response timestamp",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "authenticated": {
+            "type": "boolean",
+            "description": "Authentication status",
+            "example": false
+          },
+          "service": {
+            "type": "string",
+            "description": "Service name",
+            "example": "Pockito API"
+          }
+        }
+      }
+    }
+  }
+}
