@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Pockito API",
-    "description": "Complete API collection for Pockito Budget Management Application with automatic JWT token management using Authorization Code flow",
+    "description": "Complete API collection for Pockito Personal Finance Application with automatic JWT token management using Authorization Code flow",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

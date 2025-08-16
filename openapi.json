@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Pockito API",
-    "description": "Budget Management Application API",
+    "description": "Personal Finance Application API",
     "contact": { "name": "Pockito Team", "email": "pockito@ghassen.io" },
     "license": {
       "name": "MIT License",

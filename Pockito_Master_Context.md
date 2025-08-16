@@ -4,7 +4,7 @@
 
 **Note**: For terminal commands throughout this project, use Windows syntax 
 
-**Project**: Pockito — Budget Management Web App  
+**Project**: Pockito — Personal Finance Web App  
 **Stack (Pinned)**: Spring Boot **3.5.x** (Java 21), Angular **17+** (standalone), NgRx, Keycloak **25+** (OIDC), PostgreSQL **16**, Flyway, Tailwind CSS **3**, Docker Compose  
 **Principles**: Single Source of Truth • Centralized State • Soft Deletes • Auditability • Mobile-first UX • Simple/Flexible RBAC • Strong Typing • Accessibility (WCAG AA) • Atomic PRs • Clear DX
 
