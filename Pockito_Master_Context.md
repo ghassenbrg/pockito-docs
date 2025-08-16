@@ -1327,3 +1327,15 @@ jobs:
 - **Idempotent**: repeating the same action leaves system in same state (e.g., setDefault twice).
 
 **End of Master Context v3. Cursor: keep this open for every step.**
+
+
+---
+
+## 11) Angular Component File Structure Note
+
+**Important**: In this Angular project, always maintain separate files for each component:
+
+- **`component.ts`** - TypeScript logic, imports, and inline template/styles are **NOT** recommended
+- **`component.html`** - Template markup only
+- **`component.scss`** - Component-specific styles only
+
