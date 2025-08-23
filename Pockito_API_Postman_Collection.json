@@ -55,6 +55,41 @@
        "key": "codeChallenge",
        "value": "",
        "type": "string"
+     },
+     {
+       "key": "walletId",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "walletId2",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "categoryId",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "txnId",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "subscriptionId",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "budgetId",
+       "value": "",
+       "type": "string"
+     },
+     {
+       "key": "agreementId",
+       "value": "",
+       "type": "string"
      }
   ],
   "auth": {
@@ -586,7 +621,45 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is JSON array', function () {",
+                  "    pm.response.to.be.json;",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Wallet structure is correct', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.length > 0) {",
+                  "        const wallet = response[0];",
+                  "        pm.expect(wallet).to.have.property('id');",
+                  "        pm.expect(wallet).to.have.property('name');",
+                  "        pm.expect(wallet).to.have.property('iconType');",
+                  "        pm.expect(wallet).to.have.property('iconValue');",
+                  "        pm.expect(wallet).to.have.property('currencyCode');",
+                  "        pm.expect(wallet).to.have.property('color');",
+                  "        pm.expect(wallet).to.have.property('type');",
+                  "        pm.expect(wallet).to.have.property('initialBalance');",
+                  "        pm.expect(wallet).to.have.property('isDefault');",
+                  "        pm.expect(wallet).to.have.property('goalAmount');",
+                  "        pm.expect(wallet).to.have.property('userId');",
+                  "        pm.expect(wallet).to.have.property('createdAt');",
+                  "        pm.expect(wallet).to.have.property('updatedAt');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Wallet by ID",
@@ -603,7 +676,26 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets", "{{walletId}}"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is JSON object', function () {",
+                  "    pm.response.to.be.json;",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.be.an('object');",
+                  "    pm.expect(response.id).to.eql('{{walletId}}');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create Wallet",
@@ -621,14 +713,96 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"My Savings\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"💰\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#3B82F6\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000.00,\n  \"goalAmount\": 5000.00,\n  \"setDefault\": true\n}"
+              "raw": "{\n  \"name\": \"My Savings Wallet\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"💰\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#3B82F6\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000.00,\n  \"goalAmount\": 5000.00,\n  \"setDefault\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/wallets",
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Location header is set', function () {",
+                  "    pm.response.to.have.header('Location');",
+                  "    const location = pm.response.headers.get('Location');",
+                  "    pm.expect(location).to.include('/api/wallets/');",
+                  "});",
+                  "",
+                  "pm.test('Response contains wallet data', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.name).to.eql('My Savings Wallet');",
+                  "    pm.expect(response.iconType).to.eql('EMOJI');",
+                  "    pm.expect(response.iconValue).to.eql('💰');",
+                  "    pm.expect(response.currencyCode).to.eql('USD');",
+                  "    pm.expect(response.type).to.eql('SAVINGS');",
+                  "    pm.expect(response.initialBalance).to.eql(1000.00);",
+                  "    pm.expect(response.goalAmount).to.eql(5000.00);",
+                  "    pm.expect(response.isDefault).to.be.true;",
+                  "});",
+                  "",
+                  "// Save wallet ID for future requests",
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('walletId', response.id);",
+                  "    console.log('✅ Wallet created with ID:', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Bank Account Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Bank Account\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🏦\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#10B981\",\n  \"type\": \"BANK_ACCOUNT\",\n  \"initialBalance\": 5000.00,\n  \"setDefault\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Bank account wallet created successfully', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.name).to.eql('Main Bank Account');",
+                  "    pm.expect(response.type).to.eql('BANK_ACCOUNT');",
+                  "    pm.expect(response.goalAmount).to.be.undefined;",
+                  "    pm.expect(response.isDefault).to.be.false;",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update Wallet",
@@ -646,14 +820,34 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Savings\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🏦\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#10B981\",\n  \"type\": \"SAVINGS\",\n  \"goalAmount\": 10000.00\n}"
+              "raw": "{\n  \"name\": \"Updated Savings Wallet\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"🏦\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#10B981\",\n  \"type\": \"SAVINGS\",\n  \"goalAmount\": 10000.00\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets", "{{walletId}}"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Wallet updated successfully', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.name).to.eql('Updated Savings Wallet');",
+                  "    pm.expect(response.iconValue).to.eql('🏦');",
+                  "    pm.expect(response.color).to.eql('#10B981');",
+                  "    pm.expect(response.goalAmount).to.eql(10000.00);",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Archive Wallet",
@@ -670,7 +864,23 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets", "{{walletId}}", "archive"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty', function () {",
+                  "    pm.response.to.not.have.body;",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Activate Wallet",
@@ -687,7 +897,23 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets", "{{walletId}}", "activate"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty', function () {",
+                  "    pm.response.to.not.have.body;",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Set Default Wallet",
@@ -704,7 +930,155 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "wallets", "{{walletId}}", "default"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty', function () {",
+                  "    pm.response.to.not.have.body;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Wallet - Validation Error (Empty Name)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"💰\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#3B82F6\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000.00,\n  \"setDefault\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Validation error response structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('error');",
+                  "    pm.expect(response).to.have.property('message');",
+                  "    pm.expect(response).to.have.property('fields');",
+                  "    pm.expect(response.error).to.eql('Bad Request');",
+                  "    pm.expect(response.message).to.eql('Validation failed');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Wallet - Validation Error (Invalid Currency)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Wallet\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"💰\",\n  \"currencyCode\": \"INVALID\",\n  \"color\": \"#3B82F6\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000.00,\n  \"setDefault\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Currency validation error', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.fields).to.have.property('currencyCode');",
+                  "    pm.expect(response.fields.currencyCode).to.include('Currency code must be exactly 3 uppercase letters');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Wallet - Validation Error (Negative Goal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Wallet\",\n  \"iconType\": \"EMOJI\",\n  \"iconValue\": \"💰\",\n  \"currencyCode\": \"USD\",\n  \"color\": \"#3B82F6\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000.00,\n  \"goalAmount\": -1000.00,\n  \"setDefault\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Goal amount validation error', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.fields).to.have.property('goalAmount');",
+                  "    pm.expect(response.fields.goalAmount).to.include('Goal amount must be non-negative');",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
